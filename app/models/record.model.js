@@ -4,11 +4,7 @@ module.exports = (sequelize, Sequelize) => {
         alarm_name: {
             type: Sequelize.STRING,
             allowNull: false // name MUST have a value
-        },        
-        tenant_id: {
-            type: Sequelize.STRING,
-            allowNull: false // Tenant id MUST have a value
-        },        
+        },    
         sn: {
             type: Sequelize.STRING,
             allowNull: false // name MUST have a value

@@ -1,4 +1,4 @@
-# IOT integration Middleware with Node.js, PostgreSQL and Express Rest APIs
+# SaaS IOT integration Middleware with Node.js, PostgreSQL and Express Rest APIs
 
 
 
@@ -17,7 +17,7 @@ In app/config/db.config.js, change following settings according to your DB infor
     HOST: "localhost",      // hostname DB hosted
     PORT: '5432',
     USER: "postgres",       // DB user name
-    PASSWORD: "done100",
+    PASSWORD: "postgres",
     DB: "iotim",            // DB name
 ```
 

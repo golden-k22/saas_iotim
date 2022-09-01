@@ -396,8 +396,8 @@ exports.delete = (req, res) => {
 exports.get_Records = (req, res) => {
     const sn = req.query.device_sn ? req.query.device_sn : {[Op.iLike]: `%%`};
     const named_sn = req.query.device_name ? req.query.device_name : sn;
-    var condition1 = req.query.alarm_type ? {alarm_type: req.query.alarm_type, sn: named_sn, status: req.query.is_read, tenant_id:req.params.tenant_id} : {sn: named_sn, status: req.query.is_read, tenant_id:req.params.tenant_id};
-    var condition2 = req.query.alarm_type ? {alarm_type: req.query.alarm_type, sn: named_sn, tenant_id:req.params.tenant_id} : {sn: named_sn, tenant_id:req.params.tenant_id};
+    var condition1 = req.query.alarm_type ? {alarm_type: req.query.alarm_type, sn: named_sn, status: req.query.is_read} : {sn: named_sn, status: req.query.is_read};
+    var condition2 = req.query.alarm_type ? {alarm_type: req.query.alarm_type, sn: named_sn} : {sn: named_sn};
     var condition = req.query.is_read ? condition1 : condition2;
     var page_num = req.query.page_number ? Math.floor(req.query.page_number) : 0;
     var page_size = req.query.page_size ? Math.floor(req.query.page_size) : 0;
@@ -412,8 +412,19 @@ exports.get_Records = (req, res) => {
     page_size = req.query.limit? req.query.limit : page_size;
     offset = req.query.limit? 0 : offset;
     
-
-    Alarm_Records.findAll({where: condition, order: [["created_at", "DESC"]], limit: page_size, offset: offset})
+ 
+    Alarm_Records.belongsTo(db.Devices, {foreignKey: 'sn', targetKey: 'sn'})
+    Alarm_Records.findAll({where: condition, order: [["created_at", "DESC"]], limit: page_size, offset: offset,
+        include: [
+            {
+                model: db.Devices, 
+                attributes: ['tenant_id'],
+                where:{ 
+                    tenant_id:req.params.tenant_id
+                },
+                required: true
+            }
+        ]})
         .then(data => {
             res.send(data);
         })
@@ -434,7 +445,7 @@ exports.set_RecordSeen = (req, res) => {
     if (id == 0)
     {
         Alarm_Records.update(seen_record, {
-            where: {status: 1, tenant_id: req.params.tenant_id}
+            where: {status: 1}
         })
         .then(num => {
             res.status(200).send({
@@ -449,11 +460,11 @@ exports.set_RecordSeen = (req, res) => {
     }
     else {
         Alarm_Records.update(seen_record, {
-            where: {id: id, tenant_id: req.params.tenant_id}
+            where: {id: id}
         })
             .then(num => {
                 if (num == 1) {
-                    Alarm_Records.findOne({where: {id: id,tenant_id: req.params.tenant_id}})
+                    Alarm_Records.findOne({where: {id: id}})
                     .then(function (data) {
                         res.send(data);
                     });
@@ -480,7 +491,18 @@ exports.getRecordCount = (req, res) => {
     var condition2 = req.query.alarm_type ? {alarm_type: req.query.alarm_type, sn:sn, status: is_read} : {sn: sn, status: is_read};
     var condition = req.query.is_read ? condition2 : condition1;
     
-    Alarm_Records.count({where: condition})
+    Alarm_Records.belongsTo(db.Devices, {foreignKey: 'sn', targetKey: 'sn'})
+    Alarm_Records.count({where: condition,
+        include: [
+            {
+                model: db.Devices, 
+                attributes: ['tenant_id'],
+                where:{ 
+                    tenant_id:req.params.tenant_id
+                },
+                required: true
+            }
+        ]})
         .then(cnt => {
             res.send({count: cnt});
         })

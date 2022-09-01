@@ -22,7 +22,7 @@ exports.get_History = async (req, res) => {
 
     Device.findOne({
         where: {
-            id: device_id, status: 1
+            id: device_id, status: 1, tenant_id:req.params.tenant_id
         },
     }).then(async dev_data => {
         let latest_state = await SensorData.findOne({
@@ -105,7 +105,7 @@ exports.make_Report = async (req, res) => {
     Device.belongsTo(db.DeviceTypes, {foreignKey: 'type', targetKey: 'id'})
     Device.findOne({
         where: {
-            id: device_id, status: 1
+            id: device_id, status: 1, tenant_id:req.params.tenant_id
         },
         include: {
             model: db.DeviceTypes,
@@ -357,6 +357,7 @@ exports.get_LatestStatus = async (req, res) => {
     Device.findAll({
         where: {
             status : 1,
+            tenant_id:req.params.tenant_id
             // expire_at: {
             //     [Op.gt]: defaultDate(0),
             // }

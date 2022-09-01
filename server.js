@@ -9,7 +9,7 @@ app.use('/storage', express.static('storage')); // <-- This right here
 const initDB = require("./app/utility/psqldb_init.js");
 
 
-const hostname = "localhost";
+const hostname = "http://127.0.0.1";
 const serverPort = 8082;
 const crossPort = 8008;
 
