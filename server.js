@@ -9,13 +9,8 @@ app.use('/storage', express.static('storage')); // <-- This right here
 const initDB = require("./app/utility/psqldb_init.js");
 
 
-const hostname = "http://127.0.0.1";
+const hostname = "127.0.0.1";
 const serverPort = 8082;
-const crossPort = 8008;
-
-var corsOptions = {
-    origin: hostname+":"+crossPort
-};
 
 const corsOpts = {
     origin: '*',
@@ -30,7 +25,6 @@ const corsOpts = {
   };
 
 app.use(cors(corsOpts));
-
 
 // parse requests of content-type - application/json
 app.use(bodyParser.json());
@@ -69,8 +63,8 @@ const PORT = process.env.PORT || serverPort;
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}.`);
-    const { asUTCDate, defaultDate, getDatenow, getLocalDatenow, toLocalDate } = require("./app/utility/date_utils");
-    const utcdate_str = "2021-12-29 10:00";
-    console.log(toLocalDate(utcdate_str));
-    console.log(asUTCDate(utcdate_str));
+    // const { asUTCDate, defaultDate, getDatenow, getLocalDatenow, toLocalDate } = require("./app/utility/date_utils");
+    // const utcdate_str = "2021-12-29 10:00";
+    // console.log(toLocalDate(utcdate_str));
+    // console.log(asUTCDate(utcdate_str));
 });
