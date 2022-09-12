@@ -29,6 +29,6 @@
     "pg": "^8.8.0",
     "pg-hstore": "^2.3.3",
     "promise": "^8.2.0",
-    "sequelize": "^5.22.5"
+    "sequelize": "^6.21.6"
   }
 }
