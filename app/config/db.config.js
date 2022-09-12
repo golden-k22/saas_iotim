@@ -4,7 +4,8 @@
 //     USER: "postgres",
 //     PASSWORD: "postgres",
 //     DB: "iotim",
-//     dialect: "postgres",
+//     dialect: "postgres",    
+//     // timezone: "Atlantic/Reykjavik",  // this means UTC timezone
 //     timezone: "Europe/London",  // this means UTC timezone
 //     local_timezone: "Asia/Singapore", 
 //     ssl: false,

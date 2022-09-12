@@ -8,7 +8,10 @@ const Alarm = db.Alarms;
 const Report = db.Reports;
 const Group = db.Groups;
 const Op = db.Sequelize.Op;
+const SendRequest=require('../utility/axios_request');
 let Promise = require('promise');
+
+
 
 async function createUnique(model, where, newItem) {
     // First try to find the record
@@ -38,6 +41,9 @@ exports.create = (req, res) => {
         });
         return;
     }
+    // let permit_cnt=SendRequest();
+
+
     // Create a Device
     const device = {
         name: req.body.name,
@@ -343,7 +349,8 @@ exports.deleteAll = (req, res) => {
 const deleteDeviceById = (id, tenant_id) => {
 
     const new_device = {
-        status: 0
+        status: 0,
+        updated_at: defaultDate(0)
     };
     
     return new Promise(function (resolve, reject) {
