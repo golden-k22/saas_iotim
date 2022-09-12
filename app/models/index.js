@@ -15,6 +15,7 @@ const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
     dialectOptions: {
         ssl: dbConfig.ssl,     // this is for DB hosting
         useUTC: false,  //for reading from database
+        rejectUnauthorized: false, // <<<<<<< YOU NEED THIS
         dateStrings: true,
         typeCast: function (field, next) { // for reading from database
             if (field.type === 'DATE') {
