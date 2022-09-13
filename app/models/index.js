@@ -1,20 +1,21 @@
-const dbConfig = require("../config/db.config.js");
+const config = require("../config.js");
 
 const Sequelize = require("sequelize");
-const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
-    host: dbConfig.HOST,
-    port: dbConfig.PORT,    
-    dialect: dbConfig.dialect,
+const sequelize = new Sequelize(config.DB, config.USER, config.PASSWORD, {
+    host: config.HOST,
+    port: config.PORT,    
+    dialect: config.dialect,
     // timezone: "+8:00", 
     define: {
         underscored: true,
         freezeTableName: true, //use singular table name
         timestamps: false,  // I do not want timestamp fields by default
     },
-    ssl: dbConfig.ssl,              // this is for DB hosting
+    ssl: config.ssl,              // this is for DB hosting
     dialectOptions: {
+        // ssl:config.ssl,
         ssl: {
-            require: dbConfig.ssl,
+            require: config.ssl,
             rejectUnauthorized: false // <<<<<<< YOU NEED THIS
         },
         useUTC: false,  //for reading from database
@@ -27,10 +28,10 @@ const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
         },
     },
     pool: {
-        max: dbConfig.pool.max,
-        min: dbConfig.pool.min,
-        acquire: dbConfig.pool.acquire,
-        idle: dbConfig.pool.idle
+        max: config.pool.max,
+        min: config.pool.min,
+        acquire: config.pool.acquire,
+        idle: config.pool.idle
     }
 });
 

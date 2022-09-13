@@ -12,7 +12,7 @@ const serverPort = 8082;    // Suggest to use this value
 
 ## DB Setting 
 
-In app/config/db.config.js, change following settings according to your DB information.
+In app/config.js, change following settings according to your DB information.
 ```
     HOST: "localhost",      // hostname DB hosted
     PORT: '5432',

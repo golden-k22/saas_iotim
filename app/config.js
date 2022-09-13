@@ -14,7 +14,8 @@
 //         min: 0,
 //         acquire: 30000,
 //         idle: 10000
-//     }
+//     },
+//     billing_check_url:"http://localhost:8082/iot-service/v1/tedy/devices/counts"
 // };
 
 // Host setting
@@ -33,5 +34,6 @@ module.exports = {
         min: 0,
         acquire: 30000,
         idle: 10000
-    }
+    },
+    billing_check_url:"http://localhost:8082/iot-service/v1/tedy/devices/counts"
 };

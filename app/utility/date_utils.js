@@ -1,5 +1,5 @@
 const moment = require('moment');
-var config = require('../../app/config/db.config.js');
+var config = require('../config.js');
 
 function asUTCDate(str_datetime) {
   const utcDate1 = new Date(str_datetime);    // 2021-12-12 01:01

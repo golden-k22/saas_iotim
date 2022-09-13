@@ -8,7 +8,10 @@ const Alarm = db.Alarms;
 const Report = db.Reports;
 const Group = db.Groups;
 const Op = db.Sequelize.Op;
-const SendRequest=require('../utility/axios_request');
+const fs = require("fs");
+var path = require('path');
+const { SendRequest } = require('../utility/axios_request');
+const config = require("../config.js");
 let Promise = require('promise');
 
 
@@ -32,6 +35,7 @@ async function createUnique(model, where, newItem) {
     }
 }
 
+
 // Create and Save a new Device
 exports.create = (req, res) => {
     // Validate request
@@ -41,52 +45,71 @@ exports.create = (req, res) => {
         });
         return;
     }
-    // let permit_cnt=SendRequest();
 
+    // Checking billing status (compare current device counts with available device counts)
+    SendRequest("GET", config.billing_check_url, billingRes => {
+        var condition = { status: 1, tenant_id: req.params.tenant_id };
+        Device.count({ where: condition })
+            .then(cnt => {
+                if (cnt >= 100) {
+                    res.status(400).send({
+                        message: "Cannot add a new device more than " + billingRes.count
+                    })
+                } else {
 
-    // Create a Device
-    const device = {
-        name: req.body.name,
-        tenant_id: req.params.tenant_id,
-        sn: req.body.serialNo,
-        // type: req.body.published ? req.body.published : false
-        type: req.body.typeOfFacility,
-        group: req.body.group,
-        password: req.body.devicePassword,
-        interval: req.body.dataInterval,
-        remark: req.body.remark,
-        created_at: defaultDate(0),
-        updated_at: defaultDate(0),
-        expire_at: defaultDate(3)
-    };
-    // Save Device in the database
-    Device.findOne({ where: { sn: req.body.serialNo, status: 1, tenant_id: req.params.tenant_id } })
-        .then(function (obj) {
-            if (obj) {  // check if same value exist already in db
-                obj['duplicated'] = true;
-                console.log(obj);
-                res.status(200).send(obj);
-                return;
-            }
-            Device.create(device)
-                .then(data => {
-                    data['duplicated'] = false;
-                    res.status(201).send(data);
-                })
-                .catch(err => {
-                    console.log(err);
-                    res.status(500).send({
-                        message:
-                            err.message || "Some error occurred while creating the Device."
-                    });
+                    // Create a Device
+                    const device = {
+                        name: req.body.name,
+                        tenant_id: req.params.tenant_id,
+                        sn: req.body.serialNo,
+                        // type: req.body.published ? req.body.published : false
+                        type: req.body.typeOfFacility,
+                        group: req.body.group,
+                        password: req.body.devicePassword,
+                        interval: req.body.dataInterval,
+                        remark: req.body.remark,
+                        created_at: defaultDate(0),
+                        updated_at: defaultDate(0),
+                        expire_at: defaultDate(3)
+                    };
+                    // Save Device in the database
+                    Device.findOne({ where: { sn: req.body.serialNo, status: 1, tenant_id: req.params.tenant_id } })
+                        .then(function (obj) {
+                            if (obj) {  // check if same value exist already in db
+                                obj['duplicated'] = true;
+                                res.status(400).send("Cannot add a new device with the same Serial Number!");
+                                return;
+                            }
+                            Device.create(device)
+                                .then(data => {
+                                    data['duplicated'] = false;
+                                    res.status(201).send(data);
+                                })
+                                .catch(err => {
+                                    console.log(err);
+                                    res.status(500).send({
+                                        message:
+                                            err.message || "Some error occurred while creating the Device."
+                                    });
+                                });
+                        })
+                        .catch(err => {
+                            res.status(500).send({
+                                message:
+                                    err.message || "Some error occurred while retrieving Devices."
+                            });
+                        });
+                }
+            })
+            .catch(err => {
+                res.status(500).send({
+                    message:
+                        err.message || "Some error occurred while retrieving Devices."
                 });
-        })
-        .catch(err => {
-            res.status(500).send({
-                message:
-                    err.message || "Some error occurred while retrieving Devices."
             });
-        });
+    });
+
+
 };
 
 // Retrieve all Devices from the database.
@@ -223,86 +246,31 @@ exports.delete = (req, res) => {
                 message: "Device was deleted successfully!"
             })
         } else if (del_result == 2) {
-            res.status(500).send({
+            res.status(400).send({
                 message: "Could not delete Alarm Record Data with id=" + id
             });
         } else if (del_result == 3) {
-            res.status(500).send({
+            res.status(400).send({
                 message: "Could not delete Sensor Data with id=" + id
             });
         } else if (del_result == 4) {
-            res.send({
+            res.status(400).send({
                 message: `Cannot delete Device with id=${id}. Maybe Device was not found!`
             });
         } else if (del_result == 5) {
-            res.status(500).send({
+            res.status(400).send({
                 message: "Could not delete Device with id=" + id
             });
         } else if (del_result == 6) {
-            res.status(500).send({
+            res.status(400).send({
                 message: "Error retrieving Device with id=" + id
             });
         } else {
-            res.status(500).send({
+            res.status(400).send({
                 message: "Exception in Delete with id=" + id
             });
         }
     });
-
-
-    // Device.findByPk(id)
-    //     .then(device => {
-
-    //         Device.destroy({
-    //             where: {id: id, tenant_id: req.params.tenant_id}
-    //         })
-    //             .then(num => {
-    //                 if (num == 1) {
-    //                     SensorData.destroy({
-    //                         where: { sn: device['sn'] }
-    //                     })
-    //                         .then(num => {
-
-    //                             Alarm_Records.destroy({
-    //                                 where: { sn: device['sn'] }
-    //                             })
-    //                             .then(num=>{
-    //                                 res.send({
-    //                                     message: "Device was deleted successfully!"
-    //                                 })
-    //                             })
-    //                             .catch(err => {
-    //                                 res.status(500).send({
-    //                                     message: "Could not delete Alarm Record Data with sn=" + device['sn']
-    //                                 });
-    //                             });
-
-    //                         })
-    //                         .catch(err => {
-    //                             res.status(500).send({
-    //                                 message: "Could not delete Sensor Data with sn=" + device['sn']
-    //                             });
-    //                         });
-
-    //                 } else {
-    //                     res.send({
-    //                         message: `Cannot delete Device with id=${id}. Maybe Device was not found!`
-    //                     });
-    //                 }
-    //             })
-    //             .catch(err => {
-    //                 res.status(500).send({
-    //                     message: "Could not delete Device with id=" + id
-    //                 });
-    //             });
-
-    //     })
-    //     .catch(err => {
-    //         res.status(500).send({
-    //             message: "Error retrieving Device with id=" + id
-    //         });
-    //     });
-
 
 
     // const device = {
@@ -331,12 +299,42 @@ exports.delete = (req, res) => {
 
 // Delete all Devices from the database.
 exports.deleteAll = (req, res) => {
-    Device.destroy({
-        where: { tenant_id: req.params.tenant_id },
-        truncate: false
+    
+    Device.findAll({
+        where: {  tenant_id: req.params.tenant_id,status: 1 }
     })
-        .then(nums => {
-            res.send({ message: `${nums} Devices were deleted successfully!` });
+        .then(devices => {
+            let del_promise=new Promise(function(resolve, reject){
+                if(devices.length==0){
+                    resolve(0);
+                }else{
+                    for(let i=0;i<devices.length;i++){
+                        device=devices[i];
+                        deleteDeviceById(device["id"], req.params.tenant_id)
+                        .then(del_result => {
+                            if (del_result != 1) {
+                                reject(device["id"]);
+                            }else{
+                                if(i==devices.length-1){
+                                    resolve(devices.length);
+                                }
+                            }
+                        })
+                        .catch(err=>{
+                            console.log(err);
+                        })
+                    }
+                }                
+            })
+            del_promise.then(
+                function(value){
+                    res.send({ message: `${value} Devices were deleted successfully!` });
+                },
+                function(error){
+                    res.status(400).send({message: "Could not delete Device with id=" + error});
+                }
+            )
+            // res.send({ message: `Devices were deleted successfully!` });
         })
         .catch(err => {
             res.status(500).send({
@@ -344,6 +342,21 @@ exports.deleteAll = (req, res) => {
                     err.message || "Some error occurred while removing all Devices."
             });
         });
+
+
+    // Device.destroy({
+    //     where: { tenant_id: req.params.tenant_id },
+    //     truncate: false
+    // })
+    //     .then(nums => {
+    //         res.send({ message: `${nums} Devices were deleted successfully!` });
+    //     })
+    //     .catch(err => {
+    //         res.status(500).send({
+    //             message:
+    //                 err.message || "Some error occurred while removing all Devices."
+    //         });
+    //     });
 };
 
 const deleteDeviceById = (id, tenant_id) => {
@@ -352,13 +365,13 @@ const deleteDeviceById = (id, tenant_id) => {
         status: 0,
         updated_at: defaultDate(0)
     };
-    
+
     return new Promise(function (resolve, reject) {
 
         Device.findByPk(id)
             .then(device => {
                 Device.update(new_device, {
-                    where: {id: id, tenant_id: tenant_id}
+                    where: { id: id, tenant_id: tenant_id }
                 })
                     .then(num => {
                         if (num == 1) {
@@ -374,14 +387,25 @@ const deleteDeviceById = (id, tenant_id) => {
                                         .catch(err => {
                                             console.log("Cannot delete Alarm setting.")
                                         });
-                                    Report.destroy({
+
+                                    Report.findAll({
                                         where: { device_id: device['id'] }
                                     })
-                                        .then(num => {
+                                        .then(reports => {
+                                            reports.map(report => {
+
+                                                const report_path = path.join(__dirname, "../../" + report['url']);
+                                                fs.unlink(report_path, (err) => {
+                                                    // console.log(err);
+                                                });
+                                                report.destroy()
+                                                .then(num=>{})
+                                                .catch(err=>{
+                                                    console.log("Cannot delete Report!");
+                                                })
+                                            })
                                         })
-                                        .catch(err => {
-                                            console.log("Cannot delete Report setting.")
-                                        });
+
                                     Alarm_Records.destroy({
                                         where: { sn: device['sn'] }
                                     })
