@@ -10,7 +10,9 @@ exports.SendRequest=async (method, url, callback, data) =>{
         // console.log(response.status);
         callback(response.data);
     } catch (err) {
-        this.handleError("Operation Failed: Network Error");
+        console.log("Operation Failed: Network Error");
+        callback(err)
+        // this.handleError("Operation Failed: Network Error");
     }
     // axios.request({
     //     method: method,

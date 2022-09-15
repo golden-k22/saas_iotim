@@ -40,7 +40,12 @@ exports.create = (req, res) => {
         var condition = { status: 1, tenant_id: req.params.tenant_id };
         Gateway.count({ where: condition })
             .then(cnt => {
-                if (cnt < billingRes.gateways) {
+                
+                if (billingRes.gateways == undefined) {
+                    res.status(400).send({
+                        message: "Cannot add a new gateway because billing check failed."
+                    })
+                }else if (cnt >= billingRes.gateways) {
                     res.status(400).send({
                         message: "Cannot add a new gateway more than " + billingRes.gateways
                     })

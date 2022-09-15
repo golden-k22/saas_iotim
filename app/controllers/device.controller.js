@@ -50,9 +50,12 @@ exports.create = (req, res) => {
     SendRequest("GET", config.billing_check_url+req.params.tenant_id, billingRes => {
         var condition = { status: 1, tenant_id: req.params.tenant_id };
         Device.count({ where: condition })
-            .then(cnt => {
-                
-                if (cnt >= billingRes.sensors) {
+            .then(cnt => {                
+                if (billingRes.sensors == undefined) {
+                    res.status(400).send({
+                        message: "Cannot add a new device because billing check failed."
+                    })
+                }else if (cnt >= billingRes.sensors) {
                     res.status(400).send({
                         message: "Cannot add a new device more than " + billingRes.sensors
                     })
