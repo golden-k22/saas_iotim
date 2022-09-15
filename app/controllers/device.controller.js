@@ -47,13 +47,14 @@ exports.create = (req, res) => {
     }
 
     // Checking billing status (compare current device counts with available device counts)
-    SendRequest("GET", config.billing_check_url, billingRes => {
+    SendRequest("GET", config.billing_check_url+req.params.tenant_id, billingRes => {
         var condition = { status: 1, tenant_id: req.params.tenant_id };
         Device.count({ where: condition })
             .then(cnt => {
-                if (cnt >= 100) {
+                
+                if (cnt >= billingRes.sensors) {
                     res.status(400).send({
-                        message: "Cannot add a new device more than " + billingRes.count
+                        message: "Cannot add a new device more than " + billingRes.sensors
                     })
                 } else {
 

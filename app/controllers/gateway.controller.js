@@ -36,13 +36,13 @@ exports.create = (req, res) => {
         return;
     }
     // Checking billing status (compare current device counts with available device counts)
-    SendRequest("GET", config.billing_check_url, billingRes => {
+    SendRequest("GET", config.billing_check_url+req.params.tenant_id, billingRes => {
         var condition = { status: 1, tenant_id: req.params.tenant_id };
         Gateway.count({ where: condition })
             .then(cnt => {
-                if (cnt >= 100) {
+                if (cnt < billingRes.gateways) {
                     res.status(400).send({
-                        message: "Cannot add a new gateway more than " + billingRes.count
+                        message: "Cannot add a new gateway more than " + billingRes.gateways
                     })
                 } else {
 

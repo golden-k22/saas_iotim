@@ -15,7 +15,7 @@
 //         acquire: 30000,
 //         idle: 10000
 //     },
-//     billing_check_url:"http://localhost:8082/iot-service/v1/tedy/devices/counts"
+//     billing_check_url:"http://10.99.4.21:8000/api/subscription/plan?tenant="
 // };
 
 // Host setting
@@ -35,5 +35,5 @@ module.exports = {
         acquire: 30000,
         idle: 10000
     },
-    billing_check_url:"http://localhost:8082/iot-service/v1/tedy/devices/counts"
+    billing_check_url:"https://iotwave.tpitservice.com/api/subscription/plan?tenant="
 };
