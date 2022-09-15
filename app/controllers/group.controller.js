@@ -48,7 +48,7 @@ exports.addGroup = async (req, res) => {
         created_at: defaultDate(0),
         updated_at: defaultDate(0)
     }
-    let result = await createUnique(Group, {name: req.body.name, status: 1}, new_group);
+    let result = await createUnique(Group, {name: req.body.name, status: 1, tenant_id:req.params.tenant_id}, new_group);
     // console.log("---------resulted types here ------------", result);
     res.status(result['status']).send(result['item']);
 }
