@@ -3,7 +3,7 @@ const config = require("../config.js");
 const Sequelize = require("sequelize");
 const sequelize = new Sequelize(config.DB, config.USER, config.PASSWORD, {
     host: config.HOST,
-    port: config.PORT,    
+    port: config.PORT,
     dialect: config.dialect,
     // timezone: "+8:00", 
     define: {
@@ -13,7 +13,7 @@ const sequelize = new Sequelize(config.DB, config.USER, config.PASSWORD, {
     },
     ssl: config.ssl,              // this is for DB hosting
     dialectOptions: {
-        // ssl:config.ssl,
+        // ssl: config.ssl,
         ssl: {
             require: config.ssl,
             rejectUnauthorized: false // <<<<<<< YOU NEED THIS
@@ -54,5 +54,6 @@ db.SensorDatas = require("./sensordata.model.js")(sequelize, Sequelize);
 db.Reports = require('./report.model.js')(sequelize, Sequelize);
 db.Gateways = require('./gateway.model.js')(sequelize, Sequelize);
 db.GatewayTypes = require('./gatewaytype.model.js')(sequelize, Sequelize);
+db.Utilizations = require('./utilization.model.js')(sequelize, Sequelize);
 
 module.exports = db;

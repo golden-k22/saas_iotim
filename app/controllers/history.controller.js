@@ -9,6 +9,7 @@ const SensorData = db.SensorDatas;
 const Device = db.Devices;
 const Gateway = db.Gateways;
 const Report = db.Reports;
+const Utilization = db.Utilizations;
 const Op = db.Sequelize.Op;
 
 // Get the list of alarms.
@@ -403,5 +404,27 @@ exports.get_LatestStatus = async (req, res) => {
         });
 };
 
+
+
+//  Get latest status of all devices
+exports.get_utilization = async (req, res) => {
+    let result = [];
+
+    Utilization.findAll({
+        where: {
+            tenant_id: req.params.tenant_id
+        },
+        order: [["id", "ASC"]], limit: null, offset: null
+    })
+        .then(async utilization => {
+            res.send(utilization);
+        })
+        .catch(err => {
+            res.status(500).send({
+                message:
+                    err.message || "Some error occurred while retrieving Utilizations."
+            });
+        });
+};
 
 
