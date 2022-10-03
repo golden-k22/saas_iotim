@@ -13,6 +13,8 @@ var path = require('path');
 const { SendRequest } = require('../utility/axios_request');
 const config = require("../config.js");
 let Promise = require('promise');
+const { exception } = require("console");
+const { fail } = require("assert");
 
 
 
@@ -47,20 +49,19 @@ exports.create = (req, res) => {
     }
 
     // Checking billing status (compare current device counts with available device counts)
-    SendRequest("GET", config.billing_check_url+req.params.tenant_id, billingRes => {
+    SendRequest("GET", config.billing_check_url + req.params.tenant_id, billingRes => {
         var condition = { status: 1, tenant_id: req.params.tenant_id };
         Device.count({ where: condition })
-            .then(cnt => {                
+            .then(cnt => {
                 if (billingRes.sensors == undefined) {
                     res.status(400).send({
                         message: "Cannot add a new device because billing check failed."
                     })
-                }else if (cnt >= billingRes.sensors) {
+                } else if (cnt >= billingRes.sensors) {
                     res.status(400).send({
                         message: "Cannot add a new device more than " + billingRes.sensors
                     })
                 } else {
-
                     // Create a Device
                     const device = {
                         name: req.body.name,
@@ -116,10 +117,84 @@ exports.create = (req, res) => {
 
 };
 
+
+// Create and Save a new Device
+exports.createMultiDevices = async (req, res) => {
+    let devices = req.body;
+    
+    // Checking billing status (compare current device counts with available device counts)
+    billing_cnt=0;
+    billing_promise = new Promise(function (resolve, reject) {
+        SendRequest("GET", config.billing_check_url + req.params.tenant_id, billingRes => {
+            if (billingRes.sensors == undefined) {
+                reject("Cannot add a new device because billing check failed.") 
+            } else {
+                resolve(billingRes.sensors);
+            }
+        })
+    });
+    billing_cnt = await billing_promise;
+
+    // let tenant_id=req.params.tenant_id;
+
+    failed_devices = [];
+    let promises = [];
+    for (let index = 0; index < devices.length; index++) {
+        device = devices[index];
+        console.log(device);
+        let device_cnt=0;
+        device_cnt=await Device.count({ where: { status: 1, tenant_id: req.params.tenant_id } });
+        let dupObj=await Device.findOne({ where: { sn: device.serialNo, status: 1, tenant_id: req.params.tenant_id } })
+        let promise={};
+
+        if (device_cnt >= billing_cnt) {
+            let new_device={...device, 'message': "Cannot add more devices"}
+            failed_devices.push(new_device);
+        }else if(dupObj){
+            let new_device={...device, 'message': "Cannot add a new device with the same Serial Number!"}
+            failed_devices.push(new_device);
+        }else{
+            // Create a Device
+            const new_device = {
+                name: device.name,
+                tenant_id: req.params.tenant_id,
+                sn: device.serialNo,
+                // type: device.published ? device.published : false
+                type: device.typeOfFacility,
+                group: device.group,
+                password: device.devicePassword,
+                interval: device.dataInterval,
+                remark: device.remark,
+                created_at: defaultDate(0),
+                updated_at: defaultDate(0),
+                expire_at: defaultDate(3)
+            };
+            promise = Device.create(new_device)
+            .then(data => {
+                billing_cnt=billing_cnt-1;
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).send({
+                    message:
+                        err.message || "Some error occurred while creating the Device."
+                });
+            });
+        }
+        promises.push(promise);
+
+    };
+    await Promise.all(promises);
+    res.status(201).send(failed_devices);
+}
+
+
 // Retrieve all Devices from the database.
 exports.findAll = (req, res) => {
     const type = req.query.type ? req.query.type : { [Op.iLike]: `%%` };
     const sn = req.query.key ? req.query.key : { [Op.iLike]: `%%` };
+    const device_name = req.query.device_name ? req.query.device_name : { [Op.iLike]: `%%` }
+    const group = req.query.group ? req.query.grouop : { [Op.iLike]: `%%` }
 
     var page_num = req.query.page_number ? Math.floor(req.query.page_number) : 0;
     var page_size = req.query.page_size ? Math.floor(req.query.page_size) : 0;
@@ -139,10 +214,14 @@ exports.findAll = (req, res) => {
         // ),
         where: {
             [Op.and]: [
-                { sn: sn, status: 1, tenant_id: req.params.tenant_id },
+                { sn: sn, status: 1, name: device_name, tenant_id: req.params.tenant_id },
                 db.sequelize.where(
                     db.sequelize.cast(db.sequelize.col('devices.type'), 'varchar'),
                     type
+                ),
+                db.sequelize.where(
+                    db.sequelize.cast(db.sequelize.col('devices.group'), 'varchar'),
+                    group
                 ),
             ],
         },
@@ -303,39 +382,39 @@ exports.delete = (req, res) => {
 
 // Delete all Devices from the database.
 exports.deleteAll = (req, res) => {
-    
+
     Device.findAll({
-        where: {  tenant_id: req.params.tenant_id,status: 1 }
+        where: { tenant_id: req.params.tenant_id, status: 1 }
     })
         .then(devices => {
-            let del_promise=new Promise(function(resolve, reject){
-                if(devices.length==0){
+            let del_promise = new Promise(function (resolve, reject) {
+                if (devices.length == 0) {
                     resolve(0);
-                }else{
-                    for(let i=0;i<devices.length;i++){
-                        device=devices[i];
+                } else {
+                    for (let i = 0; i < devices.length; i++) {
+                        device = devices[i];
                         deleteDeviceById(device["id"], req.params.tenant_id)
-                        .then(del_result => {
-                            if (del_result != 1) {
-                                reject(device["id"]);
-                            }else{
-                                if(i==devices.length-1){
-                                    resolve(devices.length);
+                            .then(del_result => {
+                                if (del_result != 1) {
+                                    reject(device["id"]);
+                                } else {
+                                    if (i == devices.length - 1) {
+                                        resolve(devices.length);
+                                    }
                                 }
-                            }
-                        })
-                        .catch(err=>{
-                            console.log(err);
-                        })
+                            })
+                            .catch(err => {
+                                console.log(err);
+                            })
                     }
-                }                
+                }
             })
             del_promise.then(
-                function(value){
+                function (value) {
                     res.send({ message: `${value} Devices were deleted successfully!` });
                 },
-                function(error){
-                    res.status(400).send({message: "Could not delete Device with id=" + error});
+                function (error) {
+                    res.status(400).send({ message: "Could not delete Device with id=" + error });
                 }
             )
             // res.send({ message: `Devices were deleted successfully!` });
@@ -403,10 +482,10 @@ const deleteDeviceById = (id, tenant_id) => {
                                                     // console.log(err);
                                                 });
                                                 report.destroy()
-                                                .then(num=>{})
-                                                .catch(err=>{
-                                                    console.log("Cannot delete Report!");
-                                                })
+                                                    .then(num => { })
+                                                    .catch(err => {
+                                                        console.log("Cannot delete Report!");
+                                                    })
                                             })
                                         })
 

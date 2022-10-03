@@ -36,16 +36,16 @@ exports.create = (req, res) => {
         return;
     }
     // Checking billing status (compare current device counts with available device counts)
-    SendRequest("GET", config.billing_check_url+req.params.tenant_id, billingRes => {
+    SendRequest("GET", config.billing_check_url + req.params.tenant_id, billingRes => {
         var condition = { status: 1, tenant_id: req.params.tenant_id };
         Gateway.count({ where: condition })
             .then(cnt => {
-                
+
                 if (billingRes.gateways == undefined) {
                     res.status(400).send({
                         message: "Cannot add a new gateway because billing check failed."
                     })
-                }else if (cnt >= billingRes.gateways) {
+                } else if (cnt >= billingRes.gateways) {
                     res.status(400).send({
                         message: "Cannot add a new gateway more than " + billingRes.gateways
                     })
@@ -112,6 +112,7 @@ exports.create = (req, res) => {
 exports.findAll = (req, res) => {
     const type = req.query.type ? req.query.type : { [Op.iLike]: `%%` };
     const imei = req.query.key ? req.query.key : { [Op.iLike]: `%%` };
+    const device_name = req.query.device_name ? req.query.device_name : { [Op.iLike]:  `%%` };
 
     var page_num = req.query.page_number ? Math.floor(req.query.page_number) : 0;
     var page_size = req.query.page_size ? Math.floor(req.query.page_size) : 0;
@@ -131,7 +132,7 @@ exports.findAll = (req, res) => {
         // ),
         where: {
             [Op.and]: [
-                { imei: imei, status: 1, tenant_id: req.params.tenant_id },
+                { imei: imei, status: 1, name: device_name, tenant_id: req.params.tenant_id },
                 db.sequelize.where(
                     db.sequelize.cast(db.sequelize.col('gateway.type'), 'varchar'),
                     type

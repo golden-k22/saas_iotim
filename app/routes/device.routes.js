@@ -34,6 +34,9 @@ module.exports = app => {
 
     // Create a new Device
     router_device.post("/:tenant_id/devices/", devices.create);
+    // Create multiple Devices from csv file
+    router_device.post("/:tenant_id/devices/multiple", devices.createMultiDevices);
+
     // Update a Device with id
     router_device.post("/:tenant_id/devices/:id", devices.update);
     // get total count of devices 

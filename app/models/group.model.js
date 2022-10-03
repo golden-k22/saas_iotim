@@ -1,6 +1,6 @@
 const moment = require('moment');
 module.exports = (sequelize, Sequelize) => {
-    const Group = sequelize.define("group", {
+    const Group = sequelize.define("groups", {
         name: {
             type: Sequelize.STRING,
             allowNull: false // name MUST have a value
