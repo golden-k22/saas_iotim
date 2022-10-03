@@ -11,7 +11,11 @@ module.exports = (sequelize, Sequelize) => {
         },
         device_sn: {
             type: Sequelize.STRING,
-            allowNull: false // name MUST have a value
+            allowNull: true 
+        },
+        group: {
+            type: Sequelize.STRING,
+            allowNull: true 
         },
         alarm_type: {
             type: Sequelize.INTEGER,
