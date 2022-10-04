@@ -13,7 +13,7 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: true 
         },
-        group: {
+        group_no: {
             type: Sequelize.STRING,
             allowNull: true 
         },

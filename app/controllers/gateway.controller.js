@@ -134,7 +134,7 @@ exports.findAll = (req, res) => {
             [Op.and]: [
                 { imei: imei, status: 1, name: device_name, tenant_id: req.params.tenant_id },
                 db.sequelize.where(
-                    db.sequelize.cast(db.sequelize.col('gateway.type'), 'varchar'),
+                    db.sequelize.cast(db.sequelize.col('gateways.type'), 'varchar'),
                     type
                 ),
             ],

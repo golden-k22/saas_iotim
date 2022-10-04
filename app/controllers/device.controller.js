@@ -69,7 +69,7 @@ exports.create = (req, res) => {
                         sn: req.body.serialNo,
                         // type: req.body.published ? req.body.published : false
                         type: req.body.typeOfFacility,
-                        group: req.body.group,
+                        group_no: req.body.group,
                         password: req.body.devicePassword,
                         interval: req.body.dataInterval,
                         remark: req.body.remark,
@@ -161,7 +161,7 @@ exports.createMultiDevices = async (req, res) => {
                 sn: device.serialNo,
                 // type: device.published ? device.published : false
                 type: device.typeOfFacility,
-                group: device.group,
+                group_no: device.group,
                 password: device.devicePassword,
                 interval: device.dataInterval,
                 remark: device.remark,
@@ -194,7 +194,7 @@ exports.findAll = (req, res) => {
     const type = req.query.type ? req.query.type : { [Op.iLike]: `%%` };
     const sn = req.query.key ? req.query.key : { [Op.iLike]: `%%` };
     const device_name = req.query.device_name ? req.query.device_name : { [Op.iLike]: `%%` }
-    const group = req.query.group ? req.query.grouop : { [Op.iLike]: `%%` }
+    const group = req.query.group ? req.query.group : { [Op.iLike]: `%%` }
 
     var page_num = req.query.page_number ? Math.floor(req.query.page_number) : 0;
     var page_size = req.query.page_size ? Math.floor(req.query.page_size) : 0;
@@ -220,7 +220,7 @@ exports.findAll = (req, res) => {
                     type
                 ),
                 db.sequelize.where(
-                    db.sequelize.cast(db.sequelize.col('devices.group'), 'varchar'),
+                    db.sequelize.cast(db.sequelize.col('devices.group_no'), 'varchar'),
                     group
                 ),
             ],
@@ -290,7 +290,7 @@ exports.update = (req, res) => {
         name: req.body.name,
         // type: req.body.published ? req.body.published : false
         type: req.body.typeOfFacility,
-        group: req.body.group,
+        group_no: req.body.group,
         password: req.body.devicePassword,
         interval: req.body.dataInterval,
         remark: req.body.remark,

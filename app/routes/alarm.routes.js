@@ -9,6 +9,12 @@ module.exports = app => {
     router.get("/:tenant_id/alarms/records", alarms.get_Records);
     // Get alarm record count with params alarm_type
     router.get("/:tenant_id/alarms/records/counts", alarms.getRecordCount);
+    
+    // Get security alarmed device count
+    router.get("/:tenant_id/alarms/records/security/counts", alarms.getSecurityCounts);
+    // Get other alarmed device count
+    router.get("/:tenant_id/alarms/records/no_security/counts", alarms.getAlarmedDeviceCounts);
+    
 
     // Add a Alarm Setting by device
     router.post("/:tenant_id/alarms/", alarms.create_Alarm); 

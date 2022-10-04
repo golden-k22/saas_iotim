@@ -1,7 +1,7 @@
 const moment = require('moment');
 const {defaultDate} = require('../utility/date_utils');
 module.exports = (sequelize, Sequelize) => {
-    const Report = sequelize.define("report", {                
+    const Report = sequelize.define("reports", {                
         device_id: {
             type: Sequelize.INTEGER,
             allowNull: false // name MUST have a value
@@ -9,7 +9,7 @@ module.exports = (sequelize, Sequelize) => {
         url: {
             type: Sequelize.STRING,
         },
-        from: {
+        date_from: {
             type: Sequelize.DATE,
             get() {
                 return moment(this.getDataValue('from')).format('YYYY-MM-DD HH:mm');
@@ -17,7 +17,7 @@ module.exports = (sequelize, Sequelize) => {
                 //     .utcOffset(this.getDataValue('offset'));
             },
         },
-        to: {
+        date_to: {
             type: Sequelize.DATE,
             get() {
                 return moment(this.getDataValue('to')).format('YYYY-MM-DD HH:mm');

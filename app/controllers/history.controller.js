@@ -217,8 +217,8 @@ exports.make_Report = async (req, res) => {
             let new_report = {
                 device_id: device_id,
                 url: '/' + report_url,
-                from: from_date,
-                to: to_date,
+                date_from: from_date,
+                date_to: to_date,
                 created_at: defaultDate(0)
             }
 

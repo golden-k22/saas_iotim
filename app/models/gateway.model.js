@@ -1,7 +1,7 @@
 const moment = require('moment');
 const {defaultDate} = require('../utility/date_utils')
 module.exports = (sequelize, Sequelize) => {
-    const Gateway = sequelize.define("gateway", {
+    const Gateway = sequelize.define("gateways", {
         name: {
             type: Sequelize.STRING,
             allowNull: false // name MUST have a value

@@ -17,7 +17,7 @@ module.exports = (sequelize, Sequelize) => {
         type: {
             type: Sequelize.INTEGER
         },
-        group: {
+        group_no: {
             type: Sequelize.INTEGER
         },
         password: {

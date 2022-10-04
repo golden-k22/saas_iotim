@@ -3,6 +3,7 @@ const Alarm = db.Alarms;
 const Alarm_Records = db.Records;
 const Op = db.Sequelize.Op;
 const { defaultDate, asUTCDate } = require("../utility/date_utils");
+let moment = require('moment');
 
 // Create and Save a new Alarm by device
 exports.create_Alarm = async (req, res) => {
@@ -12,7 +13,7 @@ exports.create_Alarm = async (req, res) => {
     if (alarm.objectId != "") {
         dup_Obj = await Alarm.findOne({ where: { device_sn: alarm.objectId, alarm_type: alarm.alarmType, tenant_id: req.params.tenant_id } });
     } else if (alarm.objectId == "" && alarm.group != null) {
-        dup_Obj = await Alarm.findOne({ where: { group: alarm.group, alarm_type: alarm.alarmType, tenant_id: req.params.tenant_id } });
+        dup_Obj = await Alarm.findOne({ where: { group_no: alarm.group, alarm_type: alarm.alarmType, tenant_id: req.params.tenant_id } });
     } else {
         res.status(400).send({
             message: "Should select Device or Group!"
@@ -29,7 +30,7 @@ exports.create_Alarm = async (req, res) => {
         name: req.body.alarmName,
         tenant_id: req.params.tenant_id,
         device_sn: req.body.objectId,
-        group: req.body.group,
+        group_no: req.body.group,
         alarm_type: req.body.alarmType, // 0-temperature, 1-humidity, 2-voltage
         low_warning: req.body.lowWarning,
         high_warning: req.body.highWarning,
@@ -72,7 +73,7 @@ exports.create_multiple_Alarms = async (req, res) => {
         if (alarm.objectId != "") {
             dup_Obj = await Alarm.findOne({ where: { device_sn: alarm.objectId, alarm_type: alarm.alarmType, tenant_id: req.params.tenant_id } });
         } else if (alarm.objectId == "" && alarm.group != null) {
-            dup_Obj = await Alarm.findOne({ where: { group: alarm.group, alarm_type: alarm.alarmType, tenant_id: req.params.tenant_id } });
+            dup_Obj = await Alarm.findOne({ where: { group_no: alarm.group, alarm_type: alarm.alarmType, tenant_id: req.params.tenant_id } });
         }
 
         if (dup_Obj) {
@@ -83,7 +84,7 @@ exports.create_multiple_Alarms = async (req, res) => {
                 name: alarm.alarmName,
                 tenant_id: req.params.tenant_id,
                 device_sn: alarm.objectId,
-                group: alarm.group,
+                group_no: alarm.group,
                 alarm_type: alarm.alarmType, // 0-temperature, 1-humidity, 2-voltage
                 low_warning: alarm.lowWarning,
                 high_warning: alarm.highWarning,
@@ -153,7 +154,7 @@ exports.get_Alarms = (req, res) => {
             [Op.and]: [condition,
                 ,
                 db.sequelize.where(
-                    db.sequelize.cast(db.sequelize.col('alarms.group'), 'varchar'),
+                    db.sequelize.cast(db.sequelize.col('alarms.group_no'), 'varchar'),
                     group
                 ),
             ]
@@ -360,4 +361,80 @@ exports.getRecordCount = (req, res) => {
                     err.message || "Some error occurred while retrieving Alarm counts."
             });
         });
+};
+
+
+// get total counts of security devices.
+exports.getSecurityCounts =async (req, res) => {
+    var condition = { alarm_type: 3, created_at: { 
+        [Op.gte] : moment().subtract(60, 'minutes').toDate()
+      } };
+
+    Alarm_Records.belongsTo(db.Devices, { foreignKey: 'sn', targetKey: 'sn' })
+    let records=await Alarm_Records.count({
+        where: condition,
+        include: [
+            {
+                model: db.Devices,
+                attributes: ['tenant_id'],
+                where: {
+                    tenant_id: req.params.tenant_id
+                },
+                required: true,
+            }
+        ],
+        
+        distinct: true,
+        col: 'sn'
+    });
+    console.log(records);
+    res.status(200).send({count: records});
+};
+
+// get total counts of security devices.
+exports.getAlarmedDeviceCounts =async (req, res) => {
+    const alarm_type = req.query.type ? req.query.type : { [Op.iLike]: `%%` };
+    var condition = { alarm_type: alarm_type, created_at: { 
+        [Op.gte] : moment().subtract(60, 'minutes').toDate()
+      } };
+
+    Alarm_Records.belongsTo(db.Devices, { foreignKey: 'sn', targetKey: 'sn' })
+    let total_cnt=await Alarm_Records.count({
+        where: condition,
+        include: [
+            {
+                model: db.Devices,
+                attributes: ['tenant_id'],
+                where: {
+                    tenant_id: req.params.tenant_id
+                },
+                required: true,
+            }
+        ],
+        
+        distinct: true,
+        col: 'sn'
+    });
+    var critical_condition = { alarm_type: alarm_type, alarm_item: {[Op.lt]:2},created_at: { 
+        [Op.gte] : moment().subtract(60, 'minutes').toDate()
+      } };
+    let critical_cnt=await Alarm_Records.count({
+        where: critical_condition,
+        include: [
+            {
+                model: db.Devices,
+                attributes: ['tenant_id'],
+                where: {
+                    tenant_id: req.params.tenant_id
+                },
+                required: true,
+            }
+        ],
+        
+        distinct: true,
+        col: 'sn'
+    });
+
+    let warning_cnt=total_cnt-critical_cnt;
+    res.status(200).send({warning: warning_cnt, critical: critical_cnt});
 };
