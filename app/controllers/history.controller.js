@@ -378,12 +378,12 @@ exports.get_LatestStatus = async (req, res) => {
                         sn: device['sn'],
                         imei_registered: true
                     },
-                    order: [['sensor_time', 'DESC']],
+                    order: [['sensor_time', 'DESC']],l
                 });
                 status['voltage'] = '--';
                 status['temperature'] = '--';
                 status['humidity'] = '--';
-                status['signal'] = '--';
+                status['signal'] = '--';l
                 status['time'] = '--/--/-- --:--';
                 if (latest_state) {
                     status['voltage'] = latest_state['voltage'];
@@ -408,11 +408,23 @@ exports.get_LatestStatus = async (req, res) => {
 
 //  Get latest status of all devices
 exports.get_utilization = async (req, res) => {
+
+    let from_date = req.query.from ? req.query.from : null;
+    let to_date = req.query.to ? req.query.to : null;
+
+    from_date = asUTCDate(from_date);   // 2021-12-29 10:00
+    to_date = asUTCDate(to_date);       // 2021-12-29 10:00
+
+
+
     let result = [];
 
     Utilization.findAll({
         where: {
-            tenant_id: req.params.tenant_id
+            tenant_id: req.params.tenant_id,
+            created_at: {
+                [Op.between]: [from_date, to_date]
+            },
         },
         order: [["id", "ASC"]], limit: null, offset: null
     })
