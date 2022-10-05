@@ -133,10 +133,22 @@ exports.getCount = (req, res) => {
 
 // Get the list of alarms.
 exports.get_Alarms = (req, res) => {
-    const sn = req.query.device_sn ? req.query.device_sn : { [Op.iLike]: `%%` };
-    const group = req.query.group ? req.query.group : { [Op.iLike]: `%%` };
-    const named_sn = req.query.device_name ? req.query.device_name : sn;
-    var condition = req.query.alarm_type ? { alarm_type: req.query.alarm_type, device_sn: named_sn, status: 1, tenant_id: req.params.tenant_id } : { device_sn: named_sn, status: 1, tenant_id: req.params.tenant_id };
+    // const sn = req.query.device_sn ? req.query.device_sn : { [Op.iLike]: `%%` };
+    // const named_sn = req.query.device_name ? req.query.device_name : sn;
+    const group = req.query.group ? req.query.group : { [Op.iLike]: '' };
+    var condition={status: 1,tenant_id: req.params.tenant_id};
+    condition=req.query.device_sn ? { ...condition, device_sn: req.query.device_sn}:condition;
+    condition=req.query.device_name ? {...condition, device_sn: req.query.device_name} : condition;
+    condition = req.query.alarm_type ? { ...condition, alarm_type: req.query.alarm_type} : condition;
+    condition = req.query.group ?{
+        [Op.and]: [condition,
+            ,
+            db.sequelize.where(
+                db.sequelize.cast(db.sequelize.col('alarms.group_no'), 'varchar'),
+                req.query.group
+            ),
+        ]
+    }:condition;
 
     var page_num = req.query.page_number ? Math.floor(req.query.page_number) : 0;
     var page_size = req.query.page_size ? Math.floor(req.query.page_size) : 0;
@@ -150,15 +162,7 @@ exports.get_Alarms = (req, res) => {
     }
 
     Alarm.findAll({
-        where: {
-            [Op.and]: [condition,
-                ,
-                db.sequelize.where(
-                    db.sequelize.cast(db.sequelize.col('alarms.group_no'), 'varchar'),
-                    group
-                ),
-            ]
-        }, order: [["id", "ASC"]], limit: page_size, offset: offset
+        where: condition, order: [["id", "ASC"]], limit: page_size, offset: offset
     })
         .then(data => {
             res.send(data);

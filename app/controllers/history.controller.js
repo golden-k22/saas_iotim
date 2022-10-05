@@ -366,7 +366,7 @@ exports.get_LatestStatus = async (req, res) => {
     })
         .then(async devices => {
             console.log(devices.length);
-            let dev_num = 0;
+            // let dev_num = 0;
             for (let i = 0; i < devices.length; i++) {
                 let device = devices[i];
                 let status = {};
@@ -378,12 +378,12 @@ exports.get_LatestStatus = async (req, res) => {
                         sn: device['sn'],
                         imei_registered: true
                     },
-                    order: [['sensor_time', 'DESC']],l
+                    order: [['sensor_time', 'DESC']],
                 });
                 status['voltage'] = '--';
                 status['temperature'] = '--';
                 status['humidity'] = '--';
-                status['signal'] = '--';l
+                status['signal'] = '--';
                 status['time'] = '--/--/-- --:--';
                 if (latest_state) {
                     status['voltage'] = latest_state['voltage'];

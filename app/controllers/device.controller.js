@@ -153,7 +153,11 @@ exports.createMultiDevices = async (req, res) => {
         }else if(dupObj){
             let new_device={...device, 'message': "Cannot add a new device with the same Serial Number!"}
             failed_devices.push(new_device);
-        }else{
+        }else if(device.group==null || device.serialNo==null){
+            let new_device={...device, 'message': "Cannot add a new device with some empth fields!"}
+            failed_devices.push(new_device);
+        }
+        else{
             // Create a Device
             const new_device = {
                 name: device.name,
