@@ -352,12 +352,25 @@ exports.download_Report = (req, res) => {
 
 //  Get latest status of all devices
 exports.get_LatestStatus = async (req, res) => {
+
+    const type = req.query.type ? req.query.type : { [Op.iLike]: `%%` };
+    const device_name = req.query.device_name ? { [Op.iLike]: `%`+req.query.device_name+`%` } : { [Op.iLike]: `%%` }
+    const group = req.query.group ? req.query.group : { [Op.iLike]: `%%` }
     let result = [];
 
     Device.findAll({
         where: {
-            status: 1,
-            tenant_id: req.params.tenant_id
+            [Op.and]: [
+                { status: 1, name: device_name, tenant_id: req.params.tenant_id },
+                db.sequelize.where(
+                    db.sequelize.cast(db.sequelize.col('devices.type'), 'varchar'),
+                    type
+                ),
+                db.sequelize.where(
+                    db.sequelize.cast(db.sequelize.col('devices.group_no'), 'varchar'),
+                    group
+                ),
+            ]
             // expire_at: {
             //     [Op.gt]: defaultDate(0),
             // }

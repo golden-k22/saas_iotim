@@ -133,9 +133,6 @@ exports.getCount = (req, res) => {
 
 // Get the list of alarms.
 exports.get_Alarms = (req, res) => {
-    // const sn = req.query.device_sn ? req.query.device_sn : { [Op.iLike]: `%%` };
-    // const named_sn = req.query.device_name ? req.query.device_name : sn;
-    const group = req.query.group ? req.query.group : { [Op.iLike]: '' };
     var condition={status: 1,tenant_id: req.params.tenant_id};
     condition=req.query.device_sn ? { ...condition, device_sn: req.query.device_sn}:condition;
     condition=req.query.device_name ? {...condition, device_sn: req.query.device_name} : condition;
