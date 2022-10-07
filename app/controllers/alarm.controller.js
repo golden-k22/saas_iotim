@@ -372,7 +372,23 @@ exports.getSecurityCounts =async (req, res) => {
       } };
 
     Alarm_Records.belongsTo(db.Devices, { foreignKey: 'sn', targetKey: 'sn' })
-    let records=await Alarm_Records.count({
+    let device_cnt=await Alarm_Records.count({
+        where: condition,
+        include: [
+            {
+                model: db.Devices,
+                attributes: ['tenant_id'],
+                where: {
+                    tenant_id: req.params.tenant_id
+                },
+                required: true,
+            }
+        ],        
+        distinct: true,
+        col: 'sn'
+    });
+    
+    let gateway_cnt=await Alarm_Records.count({
         where: condition,
         include: [
             {
@@ -384,12 +400,10 @@ exports.getSecurityCounts =async (req, res) => {
                 required: true,
             }
         ],
-        
         distinct: true,
-        col: 'sn'
+        col: 'imei'
     });
-    console.log(records);
-    res.status(200).send({count: records});
+    res.status(200).send({devices: device_cnt, gateways:gateway_cnt});
 };
 
 // get total counts of security devices.

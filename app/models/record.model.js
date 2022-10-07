@@ -7,7 +7,11 @@ module.exports = (sequelize, Sequelize) => {
         },    
         sn: {
             type: Sequelize.STRING,
-            allowNull: false // name MUST have a value
+            allowNull: false // sn MUST have a value
+        },   
+        imei: {
+            type: Sequelize.STRING,
+            allowNull: false // imei MUST have a value
         },
         alarm_type: {
             type: Sequelize.INTEGER,

@@ -1,13 +1,14 @@
 const addOne = require("./crud_utils.js");
 const db = require("../models");
 module.exports = async function initDB() {
+    db.sequelize.query("DROP TABLE IF EXISTS alarm_records")
     db.sequelize.query("CREATE TABLE IF NOT EXISTS groups(Id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, status INTEGER DEFAULT 1, remark TEXT, created_at TIMESTAMP WITHOUT TIME ZONE, updated_at TIMESTAMP WITHOUT TIME ZONE,tenant_id VARCHAR(255) NOT NULL);")
     db.sequelize.query("CREATE TABLE IF NOT EXISTS alarms(Id SERIAL PRIMARY KEY, name VARCHAR(60), device_sn VARCHAR(20), group_no INT2,  alarm_type INT2, low_warning REAL, high_warning REAL, low_threshold REAL, high_threshold REAL, offline_time INT2, repeat int[], date_from timestamp without time zone, date_to timestamp without time zone, time_from TIME, time_to TIME, created_at timestamp without time zone, status INT2,tenant_id VARCHAR(255) NOT NULL );")
     db.sequelize.query("CREATE TABLE IF NOT EXISTS reports(Id SERIAL PRIMARY KEY, device_id INT2, url VARCHAR(255), date_from timestamp without time zone, date_to timestamp without time zone, created_at timestamp without time zone);")
     db.sequelize.query("CREATE TABLE IF NOT EXISTS devices(Id SERIAL PRIMARY KEY, name VARCHAR(60), SN VARCHAR(20),  type INT2, group_no INT2, password VARCHAR(30),  interval INT2, remark VARCHAR(100), status INT2, created_at timestamp without time zone, updated_at timestamp without time zone, expire_at timestamp without time zone,tenant_id VARCHAR(255) NOT NULL);")
     db.sequelize.query("CREATE TABLE IF NOT EXISTS gateways(Id SERIAL PRIMARY KEY, name VARCHAR(60), imei VARCHAR(20),  type INT2, phone_number VARCHAR(20), remark VARCHAR(100), status INT2, created_at timestamp without time zone, updated_at timestamp without time zone,tenant_id VARCHAR(255) NOT NULL);")
     db.sequelize.query("CREATE TABLE IF NOT EXISTS sensor_data(Id SERIAL PRIMARY KEY, SN VARCHAR(20), Voltage VARCHAR(6), Temperature VARCHAR(7), Humidity VARCHAR(5), RSSI VARCHAR(5), Sensor_Time timestamp without time zone, imei VARCHAR(30), imei_registered BOOL);")
-    db.sequelize.query("CREATE TABLE IF NOT EXISTS alarm_records(Id SERIAL PRIMARY KEY, alarm_name VARCHAR(60), sn VARCHAR(20), alarm_type INT2, alarm_item INT2, current_value REAL, setting_value REAL, message VARCHAR(130), status INT2, alarm_time timestamp without time zone, created_at timestamp without time zone, updated_at timestamp without time zone);")
+    db.sequelize.query("CREATE TABLE IF NOT EXISTS alarm_records(Id SERIAL PRIMARY KEY, alarm_name VARCHAR(60), sn VARCHAR(20), imei VARCHAR(20), alarm_type INT2, alarm_item INT2, current_value REAL, setting_value REAL, message VARCHAR(130), status INT2, alarm_time timestamp without time zone, created_at timestamp without time zone, updated_at timestamp without time zone);")
     db.sequelize.query("CREATE TABLE IF NOT EXISTS utilizations(Id SERIAL PRIMARY KEY, type VARCHAR(10) NOT NULL,tenant_id VARCHAR(255) NOT NULL, to_address VARCHAR(255) NOT NULL, content VARCHAR(255) NOT NULL, created_at timestamp without time zone);")
     
     new_types = [
