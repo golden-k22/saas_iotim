@@ -1,7 +1,7 @@
 const addOne = require("./crud_utils.js");
 const db = require("../models");
 module.exports = async function initDB() {
-    db.sequelize.query("DROP TABLE IF EXISTS alarm_records")
+    // db.sequelize.query("DROP TABLE IF EXISTS alarm_records")
     db.sequelize.query("CREATE TABLE IF NOT EXISTS groups(Id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, status INTEGER DEFAULT 1, remark TEXT, created_at TIMESTAMP WITHOUT TIME ZONE, updated_at TIMESTAMP WITHOUT TIME ZONE,tenant_id VARCHAR(255) NOT NULL);")
     db.sequelize.query("CREATE TABLE IF NOT EXISTS alarms(Id SERIAL PRIMARY KEY, name VARCHAR(60), device_sn VARCHAR(20), group_no INT2,  alarm_type INT2, low_warning REAL, high_warning REAL, low_threshold REAL, high_threshold REAL, offline_time INT2, repeat int[], date_from timestamp without time zone, date_to timestamp without time zone, time_from TIME, time_to TIME, created_at timestamp without time zone, status INT2,tenant_id VARCHAR(255) NOT NULL );")
     db.sequelize.query("CREATE TABLE IF NOT EXISTS reports(Id SERIAL PRIMARY KEY, device_id INT2, url VARCHAR(255), date_from timestamp without time zone, date_to timestamp without time zone, created_at timestamp without time zone);")
