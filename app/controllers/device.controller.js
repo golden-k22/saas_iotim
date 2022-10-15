@@ -197,7 +197,7 @@ exports.createMultiDevices = async (req, res) => {
 exports.findAll = (req, res) => {
     const type = req.query.type ? req.query.type : { [Op.iLike]: `%%` };
     const sn = req.query.key ? req.query.key : { [Op.iLike]: `%%` };
-    const device_name = req.query.device_name ? `%`+req.query.device_name+`%` : { [Op.iLike]: `%%` }
+    const device_name = req.query.device_name ?  { [Op.iLike]: `%`+req.query.device_name+`%` } : { [Op.iLike]: `%%` }
     const group = req.query.group ? req.query.group : { [Op.iLike]: `%%` }
 
     var page_num = req.query.page_number ? Math.floor(req.query.page_number) : 0;

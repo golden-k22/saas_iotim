@@ -112,7 +112,7 @@ exports.create = (req, res) => {
 exports.findAll = (req, res) => {
     const type = req.query.type ? req.query.type : { [Op.iLike]: `%%` };
     const imei = req.query.key ? req.query.key : { [Op.iLike]: `%%` };
-    const device_name = req.query.device_name ? `%`+req.query.device_name+`%` : { [Op.iLike]:  `%%` };
+    const device_name = req.query.device_name ?  { [Op.iLike]: `%`+req.query.device_name+`%` } : { [Op.iLike]:  `%%` };
 
     var page_num = req.query.page_number ? Math.floor(req.query.page_number) : 0;
     var page_size = req.query.page_size ? Math.floor(req.query.page_size) : 0;
