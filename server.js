@@ -2,12 +2,12 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const app = express();
-
+//
 app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({limit: '50mb'}));
 app.use('/storage', express.static('storage')); // <-- This right here
 const initDB = require("./app/utility/psqldb_init.js");
-
+//
 
 const hostname = "127.0.0.1";
 const serverPort = 8082;
