@@ -270,10 +270,10 @@ function generateFooter(doc, page_num) {
   doc
     .fontSize(10)
     .text(
-      "https://temp360.tpitservice.com",
+      "https://iotwave.tpitservice.com",
       50,
       775,
-      { align: "left", width: 500 , link: 'https://temp360.tpitservice.com/admin' }
+      { align: "left", width: 500 , link: 'https://iotwave.tpitservice.com/' }
     )
     .text(page_num, 50, 775, {align: 'right'});
 }
