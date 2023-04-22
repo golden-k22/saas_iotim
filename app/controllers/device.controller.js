@@ -78,7 +78,7 @@ exports.create = (req, res) => {
                         expire_at: defaultDate(3)
                     };
                     // Save Device in the database
-                    Device.findOne({ where: { sn: req.body.serialNo, status: 1, tenant_id: req.params.tenant_id } })
+                    Device.findOne({ where: { sn: req.body.serialNo, status: 1} })
                         .then(function (obj) {
                             if (obj) {  // check if same value exist already in db
                                 obj['duplicated'] = true;
@@ -144,7 +144,7 @@ exports.createMultiDevices = async (req, res) => {
         console.log(device);
         let device_cnt=0;
         device_cnt=await Device.count({ where: { status: 1, tenant_id: req.params.tenant_id } });
-        let dupObj=await Device.findOne({ where: { sn: device.serialNo, status: 1, tenant_id: req.params.tenant_id } })
+        let dupObj=await Device.findOne({ where: { sn: device.serialNo, status: 1} })
         let promise={};
 
         if (device_cnt >= billing_cnt) {

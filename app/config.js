@@ -15,7 +15,7 @@
 //         acquire: 30000,
 //         idle: 10000
 //     },
-//     billing_check_url:"http://10.99.4.21:8000/api/subscription/plan?tenant="
+//     billing_check_url:"http://10.99.4.7:8000/api/subscription/plan?tenant="
 // };
 
 // Host setting

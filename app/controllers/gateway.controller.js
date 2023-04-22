@@ -63,11 +63,11 @@ exports.create = (req, res) => {
                         updated_at: defaultDate(0)
                     };
                     // Save Gateway in the database
-                    Gateway.findOne({ where: { imei: req.body.imei, status: 1, tenant_id: req.params.tenant_id } })
+                    Gateway.findOne({ where: { imei: req.body.imei, status: 1} })
                         .then(function (obj) {
                             if (obj) {  // check if same value exist already in db
                                 obj.duplicated = true;
-                                res.status(400).send("Cannot add a new Gateway with the same Imei!");
+                                res.status(400).send("Same IMEI is already in use. please Select difference Device or IMEI");
                                 return;
                             }
                             Gateway.create(gateway)
