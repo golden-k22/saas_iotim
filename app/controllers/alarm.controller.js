@@ -9,10 +9,12 @@ let moment = require('moment');
 exports.create_Alarm = async (req, res) => {
     // Validate request
     let alarm = req.body;
+    
+    console.log("------alarm------", alarm);
     let dup_Obj = {};
-    if (alarm.objectId != "") {
+    if (alarm.objectId != undefined) {
         dup_Obj = await Alarm.findOne({ where: { device_sn: alarm.objectId, alarm_type: alarm.alarmType, tenant_id: req.params.tenant_id } });
-    } else if (alarm.objectId == "" && alarm.group != null) {
+    } else if (alarm.objectId == undefined && alarm.group != null) {
         dup_Obj = await Alarm.findOne({ where: { group_no: alarm.group, alarm_type: alarm.alarmType, tenant_id: req.params.tenant_id } });
     } else {
         res.status(400).send({
@@ -70,9 +72,9 @@ exports.create_multiple_Alarms = async (req, res) => {
         let promise = {};
         let alarm = alarm_list[index];
         let dup_Obj = {};
-        if (alarm.objectId != "") {
+        if (alarm.objectId != undefined) {
             dup_Obj = await Alarm.findOne({ where: { device_sn: alarm.objectId, alarm_type: alarm.alarmType, tenant_id: req.params.tenant_id } });
-        } else if (alarm.objectId == "" && alarm.group != null) {
+        } else if (alarm.objectId == undefined && alarm.group != null) {
             dup_Obj = await Alarm.findOne({ where: { group_no: alarm.group, alarm_type: alarm.alarmType, tenant_id: req.params.tenant_id } });
         }
 
