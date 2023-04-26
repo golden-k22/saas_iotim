@@ -10,7 +10,6 @@ exports.create_Alarm = async (req, res) => {
     // Validate request
     let alarm = req.body;
     
-    console.log("------alarm------", alarm);
     let dup_Obj = {};
     if (alarm.objectId != undefined) {
         dup_Obj = await Alarm.findOne({ where: { device_sn: alarm.objectId, alarm_type: alarm.alarmType, tenant_id: req.params.tenant_id } });
@@ -23,10 +22,11 @@ exports.create_Alarm = async (req, res) => {
         return;
     }
 
-    if (dup_Obj) {
-        res.status(400).send({ error: "Same alarm item exists already!" });
-        return;
-    }
+    // if (dup_Obj) {
+    //     res.status(400).send({ error: "Same alarm item exists already!" });
+    //     return;
+    // }
+    
     // Create a Alarm
     const new_alarm = {
         name: req.body.alarmName,
@@ -78,37 +78,64 @@ exports.create_multiple_Alarms = async (req, res) => {
             dup_Obj = await Alarm.findOne({ where: { group_no: alarm.group, alarm_type: alarm.alarmType, tenant_id: req.params.tenant_id } });
         }
 
-        if (dup_Obj) {
-            let new_alarm = { ...alarm, "message": "cannot add duplicated alarm for the same device." };
-            failed_list.push(new_alarm);
-        } else {
-            const new_alarm = {
-                name: alarm.alarmName,
-                tenant_id: req.params.tenant_id,
-                device_sn: alarm.objectId,
-                group_no: alarm.group,
-                alarm_type: alarm.alarmType, // 0-temperature, 1-humidity, 2-voltage
-                low_warning: alarm.lowWarning,
-                high_warning: alarm.highWarning,
-                low_threshold: alarm.lowThreshold,
-                high_threshold: alarm.highThreshold,
-                offline_time: alarm.offlineTime,
-                repeat: alarm.repeat,
-                date_from: asUTCDate(alarm.effectiveDateFrom),
-                date_to: asUTCDate(alarm.effectiveDateTo),
-                time_from: alarm.effectiveTimeFrom,
-                time_to: alarm.effectiveTimeTo,
-                created_at: defaultDate(0)
+        // if (dup_Obj) {
+        //     let new_alarm = { ...alarm, "message": "cannot add duplicated alarm for the same device." };
+        //     failed_list.push(new_alarm);
+        // } else {
+        //     const new_alarm = {
+        //         name: alarm.alarmName,
+        //         tenant_id: req.params.tenant_id,
+        //         device_sn: alarm.objectId,
+        //         group_no: alarm.group,
+        //         alarm_type: alarm.alarmType, // 0-temperature, 1-humidity, 2-voltage
+        //         low_warning: alarm.lowWarning,
+        //         high_warning: alarm.highWarning,
+        //         low_threshold: alarm.lowThreshold,
+        //         high_threshold: alarm.highThreshold,
+        //         offline_time: alarm.offlineTime,
+        //         repeat: alarm.repeat,
+        //         date_from: asUTCDate(alarm.effectiveDateFrom),
+        //         date_to: asUTCDate(alarm.effectiveDateTo),
+        //         time_from: alarm.effectiveTimeFrom,
+        //         time_to: alarm.effectiveTimeTo,
+        //         created_at: defaultDate(0)
 
-            };
-            promise = Alarm.create(new_alarm)
-                .then(data => {
-                })
-                .catch(err => {
-                    let new_alarm = { ...alarm, "message": "Some error occurred while creating the Alarm." };
-                    failed_list.push(new_alarm);
-                });
-        }
+        //     };
+        //     promise = Alarm.create(new_alarm)
+        //         .then(data => {
+        //         })
+        //         .catch(err => {
+        //             let new_alarm = { ...alarm, "message": "Some error occurred while creating the Alarm." };
+        //             failed_list.push(new_alarm);
+        //         });
+        // }
+        
+        const new_alarm = {
+            name: alarm.alarmName,
+            tenant_id: req.params.tenant_id,
+            device_sn: alarm.objectId,
+            group_no: alarm.group,
+            alarm_type: alarm.alarmType, // 0-temperature, 1-humidity, 2-voltage
+            low_warning: alarm.lowWarning,
+            high_warning: alarm.highWarning,
+            low_threshold: alarm.lowThreshold,
+            high_threshold: alarm.highThreshold,
+            offline_time: alarm.offlineTime,
+            repeat: alarm.repeat,
+            date_from: asUTCDate(alarm.effectiveDateFrom),
+            date_to: asUTCDate(alarm.effectiveDateTo),
+            time_from: alarm.effectiveTimeFrom,
+            time_to: alarm.effectiveTimeTo,
+            created_at: defaultDate(0)
+
+        };
+        promise = Alarm.create(new_alarm)
+            .then(data => {
+            })
+            .catch(err => {
+                let new_alarm = { ...alarm, "message": "Some error occurred while creating the Alarm." };
+                failed_list.push(new_alarm);
+            });
         promises.push(promise);
 
     }
